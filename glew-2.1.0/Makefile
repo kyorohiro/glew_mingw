@@ -32,6 +32,7 @@ include config/version
 
 SHELL = /bin/sh
 SYSTEM ?= $(shell config/config.guess | cut -d - -f 3 | sed -e 's/[0-9\.]//g;')
+SYSTEM=mingw-win32
 SYSTEM.SUPPORTED = $(shell test -f config/Makefile.$(SYSTEM) && echo 1)
 
 ifeq ($(SYSTEM.SUPPORTED), 1)
@@ -156,8 +157,15 @@ glew.pc: glew.pc.in
 
 BIN.LIBS = -Llib $(LDFLAGS.DYNAMIC) -l$(NAME) $(LDFLAGS.EXTRA) $(LDFLAGS.GL)
 
+ifeq ($(filter-out mingw% cygwin,$(SYSTEM)),)
+BIN.LIBS := $(BIN.LIBS:-nostdlib=)
+endif
+
 GLEWINFO.BIN       := glewinfo$(BIN.SUFFIX)
 GLEWINFO.BIN.SRC   := src/glewinfo.c
+
+#GLEWINFO.BIN       := glewinfo$(BIN.SUFFIX)
+#GLEWINFO.BIN.SRC   := src/glewinfo.c
 GLEWINFO.BIN.OBJ   := $(addprefix tmp/$(SYSTEM)/default/shared/,$(notdir $(GLEWINFO.BIN.SRC)))
 GLEWINFO.BIN.OBJ   := $(GLEWINFO.BIN.OBJ:.c=.o)
 
